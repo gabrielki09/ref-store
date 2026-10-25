@@ -39,16 +39,6 @@ func SaveRestoredFile(outputPath string, content []byte) error {
 		return errors.Join(writeTempErr, closeTempErr)
 	}
 
-	/*
-		if _, err := os.OpenFile(filepath.Join(tempDir, tempFile.Name()), os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666); err != nil {
-			if errors.Is(err, os.ErrExist) {
-				return errors.New("arquivo restaurado já existe")
-			}
-
-			return err
-		}
-	*/
-
 	if err := os.Link(tempFile.Name(), outputPath); err != nil {
 		if errors.Is(err, os.ErrExist) {
 			savedFileContent, readErr := os.ReadFile(outputPath)
