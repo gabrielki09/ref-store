@@ -5,7 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"ref-store/helpers"
+	"ref-store/pkg"
 	"strings"
 	"sync"
 	"testing"
@@ -19,7 +19,7 @@ func TestSaveRestoredFile_CreatesFile(t *testing.T) {
 	outputPath := filepath.Join(testTempDir, "file.txt")
 	expectedContent := []byte("ABCDWXYZABCD")
 
-	if err := helpers.SaveRestoredFile(outputPath, expectedContent); err != nil {
+	if err := pkg.SaveRestoredFile(outputPath, expectedContent); err != nil {
 		t.Fatalf("Erro ao salvar arquivo restaurado: %v", err)
 	}
 
@@ -58,11 +58,11 @@ func TestSaveRestoredFile_ExistingSameContent(t *testing.T) {
 	outputPath := filepath.Join(testTempDir, "file.txt")
 	expectedContent := []byte("ABCDWXYZABCD")
 
-	if err := helpers.SaveRestoredFile(outputPath, expectedContent); err != nil {
+	if err := pkg.SaveRestoredFile(outputPath, expectedContent); err != nil {
 		t.Fatalf("Erro ao salvar o primeiro arquivo restaurado: %v", err)
 	}
 
-	if err := helpers.SaveRestoredFile(outputPath, expectedContent); err != nil {
+	if err := pkg.SaveRestoredFile(outputPath, expectedContent); err != nil {
 		t.Fatalf("Erro ao salvar o segundo arquivo restaurado: %v", err)
 	}
 
@@ -89,11 +89,11 @@ func TestSaveRestoredFile_ExistingDifferentContent(t *testing.T) {
 	originalContent := []byte("ABCD")
 	differentContent := []byte("WXYZ")
 
-	if err := helpers.SaveRestoredFile(outputPath, originalContent); err != nil {
+	if err := pkg.SaveRestoredFile(outputPath, originalContent); err != nil {
 		t.Fatalf("Primeiro salvamento não esperava erro")
 	}
 
-	if err := helpers.SaveRestoredFile(outputPath, differentContent); err == nil {
+	if err := pkg.SaveRestoredFile(outputPath, differentContent); err == nil {
 		t.Fatalf("Salvamento esperava erro")
 	}
 
@@ -130,7 +130,7 @@ func TestSaveRestoredFile_InvalidDirectory(t *testing.T) {
 	outputPath := filepath.Join(testTempDir, "pasta-inexistente", "file.txt")
 	expectedContent := []byte("ABCDWXYZABCD")
 
-	err := helpers.SaveRestoredFile(outputPath, expectedContent)
+	err := pkg.SaveRestoredFile(outputPath, expectedContent)
 
 	if err == nil {
 		t.Fatalf("Esperava erro ao acessar diretório não existente")
@@ -161,7 +161,7 @@ func TestSaveRestoredFile_ConcurrentDifferentContent(t *testing.T) {
 	for _, content := range contents {
 		wg.Go(func() {
 			<-start
-			results <- helpers.SaveRestoredFile(outputPath, content)
+			results <- pkg.SaveRestoredFile(outputPath, content)
 		})
 	}
 	close(start)

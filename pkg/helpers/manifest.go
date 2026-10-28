@@ -113,23 +113,23 @@ func DecodeBlockSequence(blocks []string) ([][32]byte, error) {
 	return decodedBlockSequence, nil
 }
 
-func RestoreFromManifest(manifestPath, storageDir string) ([]byte, error) {
+func RestoreFromManifest(manifestPath, storageDir string) ([]byte, string, error) {
 	manifestData, err := LoadManifest(manifestPath)
 	if err != nil {
 		logger.Error("Erro ao carregar o manifesto:", "err", err)
-		return nil, err
+		return nil, "", err
 	}
 
 	blocks, err := DecodeBlockSequence(manifestData.Blocks)
 	if err != nil {
 		logger.Error("Erro ao decodifica os blocos do manifesto:", err)
-		return nil, err
+		return nil, "", err
 	}
 
 	reconstructed, err := ReconstructFromDisk(storageDir, blocks)
 	if err != nil {
 		logger.Error("Erro ao reconstruir os blocos do manifesto:", err)
-		return nil, err
+		return nil, "", err
 	}
 
 	reconstructedHash := ByteToHash(reconstructed)
@@ -142,7 +142,7 @@ func RestoreFromManifest(manifestPath, storageDir string) ([]byte, error) {
 			"esperado", manifestData.FileHash,
 		)
 
-		return nil, fmt.Errorf(
+		return nil, "", fmt.Errorf(
 			"Hash reconstruído diverge do manifesto, calculado = %s, esperado = %s",
 			reconstructedHashHex,
 			manifestData.FileHash,
@@ -152,10 +152,10 @@ func RestoreFromManifest(manifestPath, storageDir string) ([]byte, error) {
 	if uint64(len(reconstructed)) != manifestData.FileSize {
 		logger.Error("Tamanho reconstruído diverge do manifesto")
 
-		return nil, errors.New("tamanho reconstruído diverge do manifesto")
+		return nil, "", errors.New("tamanho reconstruído diverge do manifesto")
 	}
 
-	return reconstructed, nil
+	return reconstructed, manifestData.FileName, nil
 }
 
 func ReconstructFromDisk(storageDir string, blockSequence [][32]byte) ([]byte, error) {

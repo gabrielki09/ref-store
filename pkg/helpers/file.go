@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"os"
-	"path/filepath"
 	"ref-store/logger"
 )
 
@@ -12,13 +11,13 @@ const (
 	RestoredDir = "restored"
 )
 
-func CreateInformedFolder(wd, path string) (string, error) {
-	fullPath := filepath.Join(wd, path)
+func CreateInformedFolder(path string) (string, error) {
+	//fullPath := filepath.Join(path)
 
-	if err := os.MkdirAll(fullPath, 0755); err != nil {
+	if err := os.MkdirAll(path, 0755); err != nil {
 		logger.Error("Erro ao criar a pasta informada:", "err", err)
 		return "", err
 	}
 
-	return fullPath, nil
+	return path, nil
 }
