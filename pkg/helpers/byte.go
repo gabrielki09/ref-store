@@ -11,11 +11,13 @@ const ChunkSize = 64 * 1024
 
 type ProcessResult struct {
 	TotalUniqueBlocks   int
+	TotalRepeatedBlocks int
+	TotalNewBlocks      int
+	TotalReusedBlocks   int
 	BlockSequence       [][32]byte
 	OriginalFileHash    [32]byte
 	TotalBlock          int
 	TotalBytes          int
-	TotalRepeatedBlocks int
 }
 
 func ByteToHash(v []byte) [32]byte {
@@ -49,7 +51,10 @@ func ProcessByte(file *os.File, storageDir string) (ProcessResult, error) {
 			blockSequence = append(blockSequence, hash)
 
 			if _, ok := seenHashes[hash]; !ok {
-				if err := StoreBlock(storageDir, hash, b[:n]); err != nil {
+
+				_, err := StoreBlock(storageDir, hash, b[:n])
+
+				if err != nil {
 					logger.Error("Erro ao salvar o bloco:", "err", err)
 					return ProcessResult{}, err
 				}

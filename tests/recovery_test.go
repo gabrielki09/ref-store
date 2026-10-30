@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"ref-store/pkg"
+	"ref-store/pkg/helpers"
 	"strings"
 	"sync"
 	"testing"
@@ -161,7 +162,7 @@ func TestSaveRestoredFile_ConcurrentDifferentContent(t *testing.T) {
 	for _, content := range contents {
 		wg.Go(func() {
 			<-start
-			results <- pkg.SaveRestoredFile(outputPath, content)
+			results <- pkg.Restore(outputPath, helpers.StorageDir, content)
 		})
 	}
 	close(start)

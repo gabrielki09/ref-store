@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 )
 
-func StoreBlock(storageDir string, hash [32]byte, content []byte) error {
+func StoreBlock(storageDir string, hash [32]byte, content []byte) (bool, error) {
 	if ByteToHash(content) != hash {
-		return errors.New("conteudo diferente do hash calculado")
+		return false, errors.New("conteudo diferente do hash calculado")
 	}
 
 	fileName := HexToString(hash[:])
@@ -17,18 +17,18 @@ func StoreBlock(storageDir string, hash [32]byte, content []byte) error {
 	_, err := os.Stat(fileStoragePath)
 
 	if err == nil {
-		return nil
+		return false, nil
 	}
 
 	if !errors.Is(err, os.ErrNotExist) {
-		return err
+		return false, err
 	}
 
 	if err := os.WriteFile(fileStoragePath, content, 0666); err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
 func LoadBlock(storageDir string, hash [32]byte) ([]byte, error) {
@@ -41,7 +41,7 @@ func LoadBlock(storageDir string, hash [32]byte) ([]byte, error) {
 	}
 
 	if ByteToHash(content) != hash {
-		return nil, errors.New("conteudo diferente do hash calculado")
+		return nil, errors.New("conteúdo diferente do hash calculado")
 	}
 
 	return content, nil
