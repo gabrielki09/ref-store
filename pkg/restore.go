@@ -110,18 +110,6 @@ func publishRestoredFile(
 	if err := os.Link(tempPath, outputPath); err != nil {
 		if errors.Is(err, os.ErrExist) {
 
-			/*savedFileContent, readErr := os.ReadFile(outputPath)
-			if readErr != nil {
-				logger.Error("Erro ao ler os dados do arquivo:", "readErr", readErr)
-				return readErr
-			}
-
-			contentHash := helpers.ByteToHash(savedFileContent)
-
-			if contentHash == helpers.ByteToHash(content) {
-				return nil
-			}*/
-
 			existingFile, err := os.Open(outputPath)
 			if err != nil {
 				return err

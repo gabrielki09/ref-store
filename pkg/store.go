@@ -27,7 +27,16 @@ func Store(filePath, storageDir, manifestDir string) (string, error) {
 		"bytes", processResult.TotalBytes,
 		"blocos", processResult.TotalBlock,
 		"unicos", processResult.TotalUniqueBlocks,
+		"novos", processResult.TotalNewBlocks,
+		"reutilizados", processResult.TotalReusedBlocks,
 		"repetidos", processResult.TotalRepeatedBlocks,
+	)
+
+	logger.Info(
+		"Economia de armazenamento",
+		"bytes_novos", processResult.TotalNewBytes,
+		"bytes_reutilizados", processResult.TotalReusedBytes,
+		"bytes_repetidos", processResult.TotalRepeatedBytes,
 	)
 
 	reconstructedJSON, err := helpers.BuildManifestJSON(

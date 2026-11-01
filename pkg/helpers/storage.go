@@ -4,31 +4,56 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"ref-store/logger"
 )
 
-func StoreBlock(storageDir string, hash [32]byte, content []byte) (bool, error) {
+func StoreBlock(
+	storageDir string,
+	hash [32]byte,
+	content []byte,
+) (bool, error) {
 	if ByteToHash(content) != hash {
 		return false, errors.New("conteudo diferente do hash calculado")
 	}
 
 	fileName := HexToString(hash[:])
 	fileStoragePath := filepath.Join(storageDir, fileName)
+	tempFile, err := os.CreateTemp(storageDir, fileName)
 
-	_, err := os.Stat(fileStoragePath)
+	if err != nil {
+		return false, err
+	}
 
+	defer func() {
+		_ = tempFile.Close()
+
+		if err := os.Remove(tempFile.Name()); err != nil {
+			logger.Warn("Falha ao remover temporário", "err", err)
+		}
+	}()
+
+	if _, err := tempFile.Write(content); err != nil {
+		return false, err
+	}
+
+	if err := tempFile.Close(); err != nil {
+		return false, err
+	}
+
+	err = os.Link(tempFile.Name(), fileStoragePath)
 	if err == nil {
+		return true, nil
+	}
+
+	if errors.Is(err, os.ErrExist) {
+		if _, err := LoadBlock(storageDir, hash); err != nil {
+			return false, err
+		}
+
 		return false, nil
 	}
 
-	if !errors.Is(err, os.ErrNotExist) {
-		return false, err
-	}
-
-	if err := os.WriteFile(fileStoragePath, content, 0666); err != nil {
-		return false, err
-	}
-
-	return true, nil
+	return false, nil
 }
 
 func LoadBlock(storageDir string, hash [32]byte) ([]byte, error) {
